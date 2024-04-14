@@ -47,3 +47,35 @@ int main(int argc, char *argv[]) {
 
     return 0;
 }
+
+// Karmarkar-Karp algorithm max heap implementation in O(n log n) time
+int KarmarkarKarp(const std::vector<long long>& nums) {
+    // Create a max heap from the input numbers
+    std::vector<long long> heap(nums);
+    std::make_heap(heap.begin(), heap.end());
+
+    // Repeatedly remove the two largest elements and replace them with their difference
+    while (heap.size() > 1) {
+        std::pop_heap(heap.begin(), heap.end()); // Move the largest element to the end
+        long long a = heap.back(); // Get the largest element
+        heap.pop_back(); // Remove the largest element
+        std::pop_heap(heap.begin(), heap.end()); // Move the second largest element to the end
+        long long b = heap.back(); // Get the second largest element
+        heap.pop_back(); // Remove the second largest element
+        heap.push_back(std::abs(a - b)); // Add the difference back to the heap
+        std::push_heap(heap.begin(), heap.end()); // Re-heapify the heap
+    }
+
+    // Return the residue of the last element
+    return heap[0];
+}
+
+// Generate a random solution of 1s and -1s
+std::vector<int> generateRandomSolution(int n) {
+    std::vector<int> solution(n);
+    for (int i = 0; i < n; i++) {
+        solution[i] = std::rand() % 2 == 0 ? 1 : -1;
+    }
+    return solution;
+}
+
