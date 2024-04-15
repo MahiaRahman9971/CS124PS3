@@ -1,81 +1,44 @@
+#include "partition.hh"
+#include "functions.hh"
 #include <iostream>
-#include <fstream>
-#include <vector>
 #include <cstdlib>
-#include <ctime>
-#include <cmath>
 
-// Function prototypes
-int KarmarkarKarp(const std::vector<long long>& nums);
-std::vector<int> generateRandomSolution(int n);
-int calculateResidue(const std::vector<int>& solution, const std::vector<long long>& nums);
-std::vector<int> randomNeighbor(const std::vector<int>& currentSolution);
-
-// Main function that processes the command line arguments
-int main(int argc, char *argv[]) {
+int main(int argc, char* argv[]) {
     if (argc != 4) {
-        std::cerr << "Usage: " << argv[0] << " flag algorithm inputfile" << std::endl;
+        std::cerr << "Usage: ./partition flag algorithm inputfile\n";
         return 1;
     }
 
     int flag = std::atoi(argv[1]);
-    int algorithm = std::atoi(argv[2]);
-    std::string inputfile = argv[3];
+    int algorithm_code = std::atoi(argv[2]);
+    std::string input_file = argv[3];
 
-    std::vector<long long> nums;
-    long long num;
-    std::ifstream infile(inputfile);
-    while (infile >> num) {
-        nums.push_back(num);
-    }
+    std::vector<long long> numbers = read_numbers(input_file);
+    long long residue = 0;
 
-    // Seed the random number generator
-    std::srand(std::time(0));
-
-    // Choose algorithm based on input
-    switch(algorithm) {
-        case 0: // Repeated Random
+    switch (algorithm_code) {
+        case 0:
+            residue = karmarkar_karp(numbers);
             break;
-        case 1: // Hill Climbing
+        case 1:
+            residue = repeated_random(numbers, false);
             break;
-        case 2: // Simulated Annealing
+        case 2:
+            residue = hill_climbing(numbers, false);
+            break;
+        case 3:
+            residue = simulated_annealing(numbers, false);
             break;
         default:
-            std::cerr << "Invalid algorithm code." << std::endl;
+            std::cerr << "Invalid algorithm code\n";
             return 1;
+
+
     }
 
+    std::cout << "Residue: " << residue << std::endl;
     return 0;
 }
 
-// Karmarkar-Karp algorithm max heap implementation in O(n log n) time
-int KarmarkarKarp(const std::vector<long long>& nums) {
-    // Create a max heap from the input numbers
-    std::vector<long long> heap(nums);
-    std::make_heap(heap.begin(), heap.end());
 
-    // Repeatedly remove the two largest elements and replace them with their difference
-    while (heap.size() > 1) {
-        std::pop_heap(heap.begin(), heap.end()); // Move the largest element to the end
-        long long a = heap.back(); // Get the largest element
-        heap.pop_back(); // Remove the largest element
-        std::pop_heap(heap.begin(), heap.end()); // Move the second largest element to the end
-        long long b = heap.back(); // Get the second largest element
-        heap.pop_back(); // Remove the second largest element
-        heap.push_back(std::abs(a - b)); // Add the difference back to the heap
-        std::push_heap(heap.begin(), heap.end()); // Re-heapify the heap
-    }
-
-    // Return the residue of the last element
-    return heap[0];
-}
-
-// Generate a random solution of 1s and -1s
-std::vector<int> generateRandomSolution(int n) {
-    std::vector<int> solution(n);
-    for (int i = 0; i < n; i++) {
-        solution[i] = std::rand() % 2 == 0 ? 1 : -1;
-    }
-    return solution;
-}
 
