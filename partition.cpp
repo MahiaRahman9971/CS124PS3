@@ -1,21 +1,4 @@
 #include "partition.hh"
-#include "functions.hh"
-
-// long long karmarkar_karp(const std::vector<long long>& numbers) {
-//     // Implementation
-// }
-
-// long long repeated_random(const std::vector<long long>& numbers, bool prepartition) {
-//     // Implementation
-// }
-
-// long long hill_climbing(const std::vector<long long>& numbers, bool prepartition) {
-//     // Implementation
-// }
-
-// long long simulated_annealing(const std::vector<long long>& numbers, bool prepartition) {
-//     // Implementation
-// }
 
 std::vector<long long> read_numbers(const char* file_path) {
     std::vector<long long> numbers;
