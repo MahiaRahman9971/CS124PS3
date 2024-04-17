@@ -1,40 +1,44 @@
 #include "partition.hh"
 
-std::vector<long long> read_numbers(const char* file_path) {
-    std::vector<long long> numbers;
-    std::ifstream file(file_path);
-    long long number;
-    while (file >> number) {
-        numbers.push_back(number);
-    }
-    return numbers;
-}
-
-int main(int argc, char* argv[]) {
+int main(int argc, char** argv) {
     if (argc != 4) {
-        std::cerr << "Usage: ./partition flag algorithm inputfile\n";
+        std::cerr << "Usage: " << argv[0] << " <algorithm_id> <input_file> <max_iterations>\n";
         return 1;
     }
 
-    int flag = std::atoi(argv[1]);
-    int algorithm = std::atoi(argv[2]);
-    const char* input_file = argv[3];
+    int algorithm_id = std::stoi(argv[1]);
+    const char* input_file = argv[2];
+    int max_iterations = std::stoi(argv[3]);
 
-    std::vector<long long> numbers = read_numbers(input_file);
+    // Read the input file
+    std::vector<long long> numbers = read_input(input_file);
     long long residue;
 
-    switch (algorithm) {
+    switch (algorithm_id) {
         case 0:
             residue = karmarkar_karp(numbers);
             break;
         case 1:
+            residue = repeated_random(numbers, max_iterations, false);
+            break;
         case 2:
+            residue = hill_climbing(numbers, max_iterations, false);
+            break;
         case 3:
-            residue = repeated_random(numbers, algorithm == 11);
+            residue = simulated_annealing(numbers, max_iterations, false);
+            break;
+        case 11:
+            residue = repeated_random(numbers, max_iterations, true);
+            break;
+        case 12:
+            residue = hill_climbing(numbers, max_iterations, true);
+            break;
+        case 13:
+            residue = simulated_annealing(numbers, max_iterations, true);
             break;
         default:
-            std::cerr << "Invalid algorithm code\n";
-            return 1;
+            std::cerr << "Invalid algorithm ID\n";
+            return 2;
     }
 
     std::cout << "Residue: " << residue << std::endl;

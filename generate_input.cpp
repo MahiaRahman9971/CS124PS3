@@ -1,6 +1,4 @@
-#include <fstream>
-#include <random>
-#include <iostream>
+#include "partition.hh"
 
 int main() {
     // Set up random number generation

@@ -1,11 +1,4 @@
-#include <iostream>
-#include <fstream>
-#include <vector>
-#include <algorithm>
-#include <random>
-#include <cmath>
-#include <unordered_map>
-#include <queue>
+#include "partition.hh"
 
 // Global random device and random generator
 std::random_device rd;

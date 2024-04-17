@@ -1,28 +1,24 @@
-
 # Variables
 CXX = g++
 CXXFLAGS = -Wall -Wextra -std=c++14
 
 # Targets and Dependencies
-all: generate
+all: partition
 
-main: main.o utilities.o partition.o generate.o
-	$(CXX) $(CXXFLAGS) -o main main.o utilities.o partition.o
+partition: partition.o algorithms.o
+	$(CXX) $(CXXFLAGS) -o partition partition.o algorithms.o
 
-generate: generate.o utilities.o partition.o
-	$(CXX) $(CXXFLAGS) -o generate generate.o utilities.o partition.o
+generate_input: generate_input.o 
+	$(CXX) $(CXXFLAGS) -o generate_input generate_input.o
 
-generate.o: generate.cpp 
-	$(CXX) $(CXXFLAGS) -c generate.cpp
+generate_input.o: generate_input.cpp 
+	$(CXX) $(CXXFLAGS) -c generate_input.cpp
 
-utilities.o: utilities.cpp
-	$(CXX) $(CXXFLAGS) -c utilities.cpp
-
-partition.o: partition.cpp partition.h
+partition.o: partition.cpp
 	$(CXX) $(CXXFLAGS) -c partition.cpp
 
-main.o: main.cpp
-	$(CXX) $(CXXFLAGS) -c main.cpp
+algorithms.o: algorithms.cpp
+	$(CXX) $(CXXFLAGS) -c algorithms.cpp
 
 clean:
-	rm -f main main.o utilities.o partition.o generate generate.o
+	rm -f partition generate_input *.o
