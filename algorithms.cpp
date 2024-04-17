@@ -1,4 +1,3 @@
-#pragma once
 #include "partition.hh"
 
 // Global random device and random generator

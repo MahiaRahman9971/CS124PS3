@@ -5,7 +5,7 @@ CXXFLAGS = -Wall -Wextra -std=c++14
 # Targets and Dependencies
 .PHONY: all clean
 
-all: partition generate_input
+all: partition
 
 partition: partition.o algorithms.o
 	$(CXX) $(CXXFLAGS) -o $@ $^
@@ -19,7 +19,7 @@ generate_input.o: generate_input.cpp
 partition.o: partition.cpp partition.hh
 	$(CXX) $(CXXFLAGS) -c $<
 
-algorithms.o: algorithms.cpp algorithms.hh
+algorithms.o: algorithms.cpp
 	$(CXX) $(CXXFLAGS) -c $<
 
 clean:
