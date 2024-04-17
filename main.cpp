@@ -1,61 +1,49 @@
-#include "partition.hh"
+#include <iostream>
+#include <vector>
+#include <string>
+#include "algorithms.cpp"
 
-int main(int argc, char* argv[]) {
+int main(int argc, char** argv) {
     if (argc != 4) {
-        std::cerr << "Usage: ./partition flag algorithm inputfile\n";
+        std::cerr << "Usage: " << argv[0] << " <algorithm_id> <input_file> <max_iterations>\n";
         return 1;
     }
 
-    int flag = std::atoi(argv[1]);
-    int algorithm_code = std::atoi(argv[2]);
-    std::string input_file = argv[3];
+    int algorithm_id = std::stoi(argv[1]);
+    const char* input_file = argv[2];
+    int max_iterations = std::stoi(argv[3]);
 
-    if (flag == -1) {
-        // Testing standard representation: Generate and print a random solution
-        int n = 5;  // assuming we want a solution of size 100
-        std::vector<int> solution = generate_random_solution(n);
-        std::cout << "Sample standard representation solution:\n";
-        for (int i = 0; i < solution.size(); ++i) {
-            std::cout << solution[i] << " ";
-        }
-        std::cout << std::endl;
-        return 0;
-    }
+    // Read the input file
+    std::vector<long long> numbers = read_input(input_file);
+    long long residue;
 
-    std::vector<long long> numbers = read_numbers(input_file);
-    long long residue = 0;
-
-    switch (algorithm_code) {
+    switch (algorithm_id) {
         case 0:
             residue = karmarkar_karp(numbers);
             break;
         case 1:
-            residue = repeated_random(numbers, false);
+            residue = repeated_random(numbers, max_iterations, false);
             break;
         case 2:
-            residue = hill_climbing(numbers, false);
+            residue = hill_climbing(numbers, max_iterations, false);
             break;
         case 3:
-            residue = simulated_annealing(numbers, false);
+            residue = simulated_annealing(numbers, max_iterations, false);
             break;
         case 11:
-            residue = prepartitioned_repeated_random(numbers);
+            residue = repeated_random(numbers, max_iterations, true);
             break;
         case 12:
-            residue = prepartitioned_hill_climbing(numbers);
+            residue = hill_climbing(numbers, max_iterations, true);
             break;
         case 13:
-            residue = prepartitioned_simulated_annealing(numbers);
+            residue = simulated_annealing(numbers, max_iterations, true);
             break;
         default:
-            std::cerr << "Invalid algorithm code\n";
-            return 1;
+            std::cerr << "Invalid algorithm ID\n";
+            return 2;
     }
 
-    // std::cout << "Residue: " << residue << std::endl;
-    // std::cout << << std::endl;
-    // return 0;
+    std::cout << "Residue: " << residue << std::endl;
+    return 0;
 }
-
-
-
