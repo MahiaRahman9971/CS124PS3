@@ -25,3 +25,4 @@ double temperature(int iter);
 long long simulated_annealing(const std::vector<long long>& A, int max_iter, bool prepartition);
 
 #endif 
+
