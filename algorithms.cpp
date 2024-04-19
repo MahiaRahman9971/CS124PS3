@@ -33,6 +33,7 @@ std::vector<long long> transform_prepartition(const std::vector<long long>& A, c
     return A_prime;
 }
 
+
 // Karmarkar-Karp algorithm
 long long karmarkar_karp(const std::vector<long long>& A) {
     std::vector<long long> heap = A;
@@ -183,3 +184,6 @@ std::vector<long long> generate_random_instance(int size, long long max_value) {
     }
     return instance;
 }
+
+
+

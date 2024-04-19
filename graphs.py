@@ -1,26 +1,31 @@
-import pandas as pd
 import matplotlib.pyplot as plt
+import pandas as pd
 
-# Load the data from CSV
 data = pd.read_csv('results.csv')
 
-# Function to plot each algorithm
-def plot_algorithm(column_name, title, file_name):
-    plt.figure(figsize=(10, 6))
-    plt.plot(data['Instance'], data[column_name], label=title, marker='o', color='b')
-    plt.title(f'{title} Performance Over Instances')
-    plt.xlabel('Instance')
-    plt.ylabel('Residue')
-    plt.legend()
-    plt.grid(True)
-    plt.savefig(f'{file_name}.png')
-    plt.show()
+# Reordering the columns as specified
+column_order = ['KK', 'RR Standard', 'HC Standard', 'SA Standard', 'RR Prepartitioned', 'HC Prepartitioned', 'SA Prepartitioned']
+data = data[column_order]
 
-# Plotting each algorithm separately
-plot_algorithm('KK', 'Karmarkar-Karp', 'karmarkar_karp')
-plot_algorithm('RR Standard', 'Repeated Random Standard', 'repeated_random_standard')
-plot_algorithm('RR Prepartitioned', 'Repeated Random Prepartitioned', 'repeated_random_prepartitioned')
-plot_algorithm('HC Standard', 'Hill Climbing Standard', 'hill_climbing_standard')
-plot_algorithm('HC Prepartitioned', 'Hill Climbing Prepartitioned', 'hill_climbing_prepartitioned')
-plot_algorithm('SA Standard', 'Simulated Annealing Standard', 'simulated_annealing_standard')
-plot_algorithm('SA Prepartitioned', 'Simulated Annealing Prepartitioned', 'simulated_annealing_prepartitioned')
+# Setting up the plot
+plt.figure(figsize=(14, 8))
+boxprops = dict(linestyle='-', linewidth=2, color='darkblue')
+whiskerprops = dict(linestyle='--', linewidth=2, color='orange')
+capprops = dict(linestyle='-', linewidth=2, color='black')
+medianprops = dict(linestyle='-', linewidth=2.5, color='orange')
+flierprops = dict(marker='o', markersize=12, linestyle='none')
+
+data.boxplot(column=column_order,
+             boxprops=boxprops, whiskerprops=whiskerprops, capprops=capprops,
+             medianprops=medianprops, flierprops=flierprops, patch_artist=True)
+
+plt.title('Algorithm Residue Comparisons', fontsize=16, fontweight='bold')
+plt.ylabel('Residue (Log Scale)', fontsize=14)
+plt.xlabel('Algorithms', fontsize=14)
+plt.xticks(rotation=45, fontsize=12)
+plt.yscale('log')  # Using logarithmic scale due to wide range of values
+plt.grid(True, linestyle='--', alpha=0.6)
+
+# Show the plot
+plt.tight_layout()
+plt.show()

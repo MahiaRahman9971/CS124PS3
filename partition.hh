@@ -12,6 +12,7 @@
 #include <cstdlib>
 #include <unordered_map>
 #include <climits>
+#include <chrono>
 
 std::vector<long long> read_input(const char* filename);
 std::vector<long long> transform_prepartition(const std::vector<long long>& A, const std::vector<int>& P);
