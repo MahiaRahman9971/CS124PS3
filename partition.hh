@@ -24,5 +24,7 @@ void generate_neighbor_solution(std::vector<int>& solution, bool prepartition);
 long long hill_climbing(const std::vector<long long>& A, bool prepartition);
 double temperature(int iter);
 long long simulated_annealing(const std::vector<long long>& A, bool prepartition);
+std::vector<long long> generate_random_instance(int size, long long max_value);
+std::vector<int> random_neighbor(const std::vector<int>& solution, bool prepartition);
 
 #endif 
