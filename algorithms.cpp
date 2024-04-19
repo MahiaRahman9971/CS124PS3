@@ -3,12 +3,18 @@
 // Global random device and random generator
 std::random_device rd;
 std::mt19937_64 rng(rd());
+std::uniform_int_distribution<long long> dist(0, 1000000000000LL);
 int max_iter = 30000;
 
 // Function to read the input file into a vector of integers
 std::vector<long long> read_input(const char* filename) {
-    std::vector<long long> numbers;
     std::ifstream file(filename);
+    if (!file) {
+        std::cerr << "Error opening file: " << filename << std::endl;
+        return {};
+    }
+
+    std::vector<long long> numbers;
     long long number;
     while (file >> number) {
         numbers.push_back(number);
@@ -18,15 +24,25 @@ std::vector<long long> read_input(const char* filename) {
 
 // Apply the transformation based on prepartitioning P to get a new array A'
 std::vector<long long> transform_prepartition(const std::vector<long long>& A, const std::vector<int>& P) {
-    int num_partitions = *max_element(P.begin(), P.end()) + 1; 
+    if (P.empty()) {
+        std::cerr << "Partition vector P is empty." << std::endl;
+        return {};
+    }
+
+    int num_partitions = *max_element(P.begin(), P.end()) + 1;
     std::vector<long long> partition_sums(num_partitions, 0);
+
     for (size_t i = 0; i < A.size(); ++i) {
+        if (P[i] < 0 || P[i] >= num_partitions) {
+            std::cerr << "Invalid partition index: " << P[i] << std::endl;
+            continue;
+        }
         partition_sums[P[i]] += A[i];
     }
 
     std::vector<long long> A_prime;
     for (long long sum : partition_sums) {
-        if (sum != 0) { 
+        if (sum != 0) {
             A_prime.push_back(sum);
         }
     }
@@ -35,6 +51,11 @@ std::vector<long long> transform_prepartition(const std::vector<long long>& A, c
 
 // Karmarkar-Karp algorithm
 long long karmarkar_karp(const std::vector<long long>& A) {
+    if (A.empty()) {
+        std::cerr << "Input vector A is empty." << std::endl;
+        return 0;
+    }
+
     std::vector<long long> heap = A;
     std::make_heap(heap.begin(), heap.end());
     while (heap.size() > 1) {
@@ -42,13 +63,18 @@ long long karmarkar_karp(const std::vector<long long>& A) {
         long long largest = heap.back();
         heap.pop_back();
 
-        std::pop_heap(heap.begin(), heap.end());
-        long long second_largest = heap.back();
-        heap.pop_back();
+        if (!heap.empty()) {
+            std::pop_heap(heap.begin(), heap.end());
+            long long second_largest = heap.back();
+            heap.pop_back();
 
-        long long new_elem = largest - second_largest;
-        heap.push_back(new_elem);
-        std::push_heap(heap.begin(), heap.end());
+            long long new_elem = largest - second_largest;
+            heap.push_back(new_elem);
+            std::push_heap(heap.begin(), heap.end());
+        } else {
+            std::cerr << "Heap has insufficient elements for operation." << std::endl;
+            break;
+        }
     }
     return std::abs(heap[0]);
 }
