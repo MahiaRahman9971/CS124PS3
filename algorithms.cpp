@@ -3,59 +3,63 @@
 // Global random device and random generator
 std::random_device rd;
 std::mt19937_64 rng(rd());
-int max_iter = 25000;
+int max_iter = 30000;
 
-// Karmarkar-Karp algorithm 
-long long karmarkar_karp(const std::vector<long long>& nums) {
-    std::vector<long long> heap(nums);
+// Function to read the input file into a vector of integers
+std::vector<long long> read_input(const char* filename) {
+    std::vector<long long> numbers;
+    std::ifstream file(filename);
+    long long number;
+    while (file >> number) {
+        numbers.push_back(number);
+    }
+    return numbers;
+}
+
+// Apply the transformation based on prepartitioning P to get a new array A'
+std::vector<long long> transform_prepartition(const std::vector<long long>& A, const std::vector<int>& P) {
+    int num_partitions = *max_element(P.begin(), P.end()) + 1; 
+    std::vector<long long> partition_sums(num_partitions, 0);
+    for (size_t i = 0; i < A.size(); ++i) {
+        partition_sums[P[i]] += A[i];
+    }
+
+    std::vector<long long> A_prime;
+    for (long long sum : partition_sums) {
+        if (sum != 0) { 
+            A_prime.push_back(sum);
+        }
+    }
+    return A_prime;
+}
+
+// Karmarkar-Karp algorithm
+long long karmarkar_karp(const std::vector<long long>& A) {
+    std::vector<long long> heap = A;
     std::make_heap(heap.begin(), heap.end());
-
     while (heap.size() > 1) {
         std::pop_heap(heap.begin(), heap.end());
         long long largest = heap.back();
         heap.pop_back();
 
-        if (!heap.empty()) {
-            std::pop_heap(heap.begin(), heap.end());
-            long long second_largest = heap.back();
-            heap.pop_back();
+        std::pop_heap(heap.begin(), heap.end());
+        long long second_largest = heap.back();
+        heap.pop_back();
 
-        long long difference = largest - second_largest;
-        heap.push_back(difference);
+        long long new_elem = largest - second_largest;
+        heap.push_back(new_elem);
         std::push_heap(heap.begin(), heap.end());
     }
-    return std::abs(heap.front());
+    return std::abs(heap[0]);
 }
 
+// Karmarkar-Karp algorithm using prepartitioning
 long long karmarkar_karp_prepartitioned(const std::vector<long long>& A, const std::vector<int>& P) {
-    std::unordered_map<int, long long> partition_sums;
-    for (size_t i = 0; i < A.size(); ++i) {
-        partition_sums[P[i]] += A[i];
-    }
-
-    std::vector<long long> partition_values;
-    for (const auto& pair : partition_sums) {
-        partition_values.push_back(pair.second);
-    }
-    return karmarkar_karp(partition_values);
+    std::vector<long long> A_prime = transform_prepartition(A, P);
+    return karmarkar_karp(A_prime);
 }
 
-std::vector<int> random_solution(size_t n, bool prepartition) {
-    std::vector<int> solution(n);
-    if (prepartition) {
-        std::uniform_int_distribution<int> part_dist(0, n - 1);
-        for (size_t i = 0; i < n; ++i) {
-            solution[i] = part_dist(rng);
-        }
-    } else {
-        std::uniform_int_distribution<int> sign_dist(0, 1);
-        for (size_t i = 0; i < n; ++i) {
-            solution[i] = sign_dist(rng) * 2 - 1; // generates -1 or 1
-        }
-    } 
-    return solution;
-}
-
+// Function to calculate residue for a given solution
 long long calculate_residue(const std::vector<long long>& A, const std::vector<int>& S) {
     long long residue = 0;
     for (size_t i = 0; i < A.size(); ++i) {
@@ -64,53 +68,73 @@ long long calculate_residue(const std::vector<long long>& A, const std::vector<i
     return std::abs(residue);
 }
 
-std::vector<int> neighbor_solution(const std::vector<int>& solution, bool prepartition) {
-    std::vector<int> neighbor = solution;
-    std::uniform_int_distribution<size_t> index_dist(0, solution.size() - 1);
-    size_t i = index_dist(rng);
-    size_t j = index_dist(rng);
-    while (j == i) {
-        j = index_dist(rng);
-    }
-
+// Generate a random solution
+void generate_random_solution(std::vector<int>& solution, std::uniform_int_distribution<int>& dist, bool prepartition) {
     if (prepartition) {
-        std::uniform_int_distribution<int> part_dist(0, solution.size() - 1);
-        neighbor[i] = part_dist(rng);
+        for (auto& elem : solution) {
+            elem = dist(rng);
+        }
     } else {
-        neighbor[i] = -neighbor[i];
-        if (std::bernoulli_distribution(0.5)(rng)) {
-            neighbor[j] = -neighbor[j];
+        std::uniform_int_distribution<int> sign_dist(-1, 1);
+        for (auto& elem : solution) {
+            elem = sign_dist(rng);
         }
     }
-    return neighbor;
 }
 
+// Repeated Random algorithm
 long long repeated_random(const std::vector<long long>& A, bool prepartition) {
-    std::vector<int> solution = random_solution(A.size(), prepartition);
-    long long best_residue = (prepartition ? karmarkar_karp_prepartitioned(A, solution) : calculate_residue(A, solution));
+    std::uniform_int_distribution<int> dist(1, A.size());
+    std::vector<int> solution(A.size());
+    long long best_residue = LLONG_MAX;
 
     for (int i = 0; i < max_iter; ++i) {
-        std::vector<int> new_solution = random_solution(A.size(), prepartition);
-        long long new_residue = (prepartition ? karmarkar_karp_prepartitioned(A, new_solution) : calculate_residue(A, new_solution));
-        if (new_residue < best_residue) {
-            best_residue = new_residue;
+        generate_random_solution(solution, dist, prepartition);
+        long long res = (prepartition ? karmarkar_karp_prepartitioned(A, solution) : calculate_residue(A, solution));
+        if (res < best_residue) {
+            best_residue = res;
         }
     }
     return best_residue;
 }
 
+// Generate a neighboring solution
+void generate_neighbor_solution(std::vector<int>& solution, bool prepartition) {
+    std::uniform_int_distribution<int> dist_index(0, solution.size() - 1);
+    int changes = 1 + (rand() % 3); 
+    for (int change = 0; change < changes; ++change) {
+        int i = dist_index(rng);
+        if (prepartition) {
+            int new_partition = dist_index(rng) + 1;
+            while (solution[i] == new_partition) { 
+                new_partition = dist_index(rng) + 1;
+            }
+            solution[i] = new_partition;
+        } else {
+            solution[i] = -solution[i]; 
+        }
+    }
+}
+
+// Hill Climbing algorithm
 long long hill_climbing(const std::vector<long long>& A, bool prepartition) {
-    std::vector<int> solution = random_solution(A.size(), prepartition);
+    std::uniform_int_distribution<int> dist(1, A.size());
+    std::vector<int> solution(A.size());
+    generate_random_solution(solution, dist, prepartition);
+
     long long current_residue = (prepartition ? karmarkar_karp_prepartitioned(A, solution) : calculate_residue(A, solution));
     long long best_residue = current_residue;
 
     for (int i = 0; i < max_iter; ++i) {
-        std::vector<int> new_solution = neighbor_solution(solution, prepartition);
+        std::vector<int> new_solution = solution;
+        generate_neighbor_solution(new_solution, prepartition);
         long long new_residue = (prepartition ? karmarkar_karp_prepartitioned(A, new_solution) : calculate_residue(A, new_solution));
+
         if (new_residue < current_residue) {
             current_residue = new_residue;
             solution = new_solution;
         }
+
         if (current_residue < best_residue) {
             best_residue = current_residue;
         }
@@ -118,29 +142,30 @@ long long hill_climbing(const std::vector<long long>& A, bool prepartition) {
     return best_residue;
 }
 
+// Temperature schedule function
 double temperature(int iter) {
     return 1e10 * pow(0.8, iter / 300);
 }
 
+// Simulated Annealing algorithm
 long long simulated_annealing(const std::vector<long long>& A, bool prepartition) {
-    std::vector<int> solution = random_solution(A.size(), prepartition);
+    std::uniform_int_distribution<int> dist(1, A.size());
+    std::vector<int> solution(A.size());
+    generate_random_solution(solution, dist, prepartition);
+
     long long current_residue = (prepartition ? karmarkar_karp_prepartitioned(A, solution) : calculate_residue(A, solution));
     long long best_residue = current_residue;
 
+    std::uniform_real_distribution<double> prob(0.0, 1.0);
+
     for (int i = 0; i < max_iter; ++i) {
-        std::vector<int> new_solution = neighbor_solution(solution, prepartition);
+        std::vector<int> new_solution = solution;
+        generate_neighbor_solution(new_solution, prepartition);
         long long new_residue = (prepartition ? karmarkar_karp_prepartitioned(A, new_solution) : calculate_residue(A, new_solution));
 
-        if (new_residue < current_residue) {
+        if (new_residue < current_residue || std::exp(-(new_residue - current_residue) / temperature(i)) > prob(rng)) {
             current_residue = new_residue;
             solution = new_solution;
-        } else {
-            double T = temperature(i);
-            double prob = exp(-(new_residue - current_residue) / T);
-            if ((double)rand() / RAND_MAX < prob) {
-                current_residue = new_residue;
-                solution = new_solution;
-            }
         }
 
         if (current_residue < best_residue) {
@@ -148,4 +173,13 @@ long long simulated_annealing(const std::vector<long long>& A, bool prepartition
         }
     }
     return best_residue;
+}
+
+std::vector<long long> generate_random_instance(int size, long long max_value) {
+    std::vector<long long> instance;
+    std::uniform_int_distribution<long long> dist(1, max_value);
+    for (int i = 0; i < size; ++i) {
+        instance.push_back(dist(rng));
+    }
+    return instance;
 }
