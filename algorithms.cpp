@@ -200,12 +200,3 @@ long long simulated_annealing(const std::vector<long long>& A, bool prepartition
     }
     return best_residue;
 }
-
-std::vector<long long> generate_random_instance(int size, long long max_value) {
-    std::vector<long long> instance;
-    std::uniform_int_distribution<long long> dist(1, max_value);
-    for (int i = 0; i < size; ++i) {
-        instance.push_back(dist(rng));
-    }
-    return instance;
-}
