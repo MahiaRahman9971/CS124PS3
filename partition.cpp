@@ -2,7 +2,7 @@
 
 int main(int argc, char** argv) {
     if (argc != 4) {
-        std::cerr << "Usage: " << argv[0] << " <algorithm_id> <input_file>\n";
+        std::cerr << "Usage: ./partition <flag> <algorithm> <inputfile>\n";
         return 1;
     }
 
@@ -10,7 +10,13 @@ int main(int argc, char** argv) {
     const char* input_file = argv[3];
 
     // Read the input file
-    std::vector<long long> numbers = read_input(input_file);
+    std::vector<long long> numbers;
+    std::ifstream file(input_file);
+    long long number;
+    while (file >> number) {
+        numbers.push_back(number);
+    }
+
     long long residue;
 
     switch (algorithm_id) {
